@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Economy Generator | Silvex United</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-dark: #1a1b3d;
+            --primary: #2a2b5a;
+            --primary-light: #3a3b7a;
+            --secondary-dark: #16213E;
+            --secondary: #0F3460;
+            --accent: #8A2BE2;
+            --accent-light: #9370DB;
+            --text: #E6E6FA;
+            --text-muted: #A9A9C5;
+            --success: #4CC9F0;
+            --danger: #F72585;
+            --card-bg: rgba(26, 27, 61, 0.8);
+            --card-border: rgba(138, 43, 226, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--primary-dark) 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%238A2BE2" fill-opacity="0.1" d="M0,128L48,117.3C96,107,192,85,288,112C384,139,480,213,576,224C672,235,768,181,864,160C960,139,1056,149,1152,165.3C1248,181,1344,203,1392,213.3L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+            z-index: -1;
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(26, 27, 61, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--accent-light);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-light);
+        }
+        
+        /* Sections */
+        section {
+            padding: 100px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        /* Hero Section */
+        #hero {
+            text-align: center;
+            padding-top: 150px;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--accent-light), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.6);
+        }
+        
+        /* Features Section */
+        #features {
+            background: rgba(15, 16, 35, 0.7);
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+            color: var(--accent-light);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--success);
+        }
+        
+        /* Generator Section */
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            flex: 1;
+            min-width: 300px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+        }
+        
+        .card h2 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--accent-light);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--card-border);
+            font-weight: 600;
+        }
+        
+        .card h2 i {
+            color: var(--success);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--primary-light);
+            border-radius: 10px;
+            background: var(--primary);
+            color: var(--text);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.3);
+        }
+        
+        button {
+            padding: 14px 25px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(138, 43, 226, 0.4);
+        }
+        
+        .command-block {
+            background: var(--primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            border-left: 4px solid var(--accent);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .command-block:hover {
+            transform: translateY(-3px);
+        }
+        
+        .item-list {
+            margin-top: 30px;
+        }
+        
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--primary);
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--success);
+            animation: fadeIn 0.5s ease-out;
+            transition: transform 0.3s ease;
+        }
+        
+        .item:hover {
+            transform: translateX(5px);
+        }
+        
+        .item-info {
+            flex: 2;
+        }
+        
+        .item-actions {
+            flex: 1;
+            text-align: right;
+        }
+        
+        .delete-btn {
+            background: var(--danger);
+            padding: 8px 15px;
+            font-size: 14px;
+            width: auto;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(90deg, var(--secondary), var(--primary-light));
+            width: auto;
+            padding: 10px 18px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--primary-dark);
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid var(--card-border);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-light);
+            margin-bottom: 20px;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-links a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-light);
+        }
+        
+        .copyright {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .feature-card, .card {
+            animation: slideUp 0.8s ease-out;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--success);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--primary-dark);
+                flex-direction: column;
+                padding: 20px;
+                gap: 15px;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-cube"></i>
+                <span>Silvex United</span>
+            </div>
+            <div class="nav-links">
+                <a href="#hero">Home</a>
+                <a href="#features">Features</a>
+                <a href="#generator">Generator</a>
+                <a href="#about">About</a>
+            </div>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <section id="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Minecraft Economy Command Generator</h1>
+                <p class="hero-subtitle">Create custom economy systems for your Minecraft server with ease</p>
+                <a href="#generator" class="cta-button">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="features">
+        <div class="container">
+            <h2 class="section-title">Powerful Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="feature-title">Command Generation</h3>
+                    <p>Automatically generate Minecraft commands for your economy system</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3 class="feature-title">Customizable</h3>
+                    <p>Set custom prices and quantities for any Minecraft item</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="feature-title">Efficient</h3>
+                    <p>Save time with our intuitive interface and quick generation</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="generator">
+        <div class="container">
+            <h2 class="section-title">Command Generator</h2>
+            <div class="content">
+                <div class="card">
+                    <h2><i class="fas fa-plus-circle"></i> Add New Item</h2>
+                    <div class="form-group">
+                        <label for="itemName">Item Name (Minecraft ID)</label>
+                        <input type="text" id="itemName" placeholder="e.g., diamond, emerald, netherite_ingot">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quantity">Quantity Required</label>
+                        <input type="number" id="quantity" min="1" value="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="price">Price (Money Added)</label>
+                        <input type="number" id="price" min="1" value="1">
+                    </div>
+                    
+                    <button id="addItem">
+                        <i class="fas fa-plus"></i> Add Item to Economy
+                    </button>
+                    
+                    <div class="item-list">
+                        <h2><i class="fas fa-list"></i> Current Items</h2>
+                        <div id="itemsContainer">
+                            <!-- Items will be added here -->
+                            <p style="text-align: center; color: var(--text-muted);">No items added yet</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2><i class="fas fa-code"></i> Generated Commands</h2>
+                    <div id="commandsContainer">
+                        <p style="text-align: center; color: var(--text-muted);">Add items to generate commands</p>
+                    </div>
+                    <button id="copyAll" class="copy-btn">
+                        <i class="fas fa-copy"></i> Copy All Commands
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <h2 class="section-title">About Silvex United</h2>
+            <div class="card">
+                <p style="text-align: center; margin-bottom: 20px;">
+                    Silvex United is a dedicated team of developers creating powerful tools for the Minecraft community.
+                </p>
+                <p style="text-align: center;">
+                    Our mission is to simplify server management and enhance the Minecraft experience for players and server owners alike.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Silvex United</div>
+            <div class="footer-links">
+                <a href="#hero">Home</a>
+                <a href="#features">Features</a>
+                <a href="#generator">Generator</a>
+                <a href="#about">About</a>
+            </div>
+            <p class="copyright">© 2023 Silvex United. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addItemBtn = document.getElementById('addItem');
+            const itemsContainer = document.getElementById('itemsContainer');
+            const commandsContainer = document.getElementById('commandsContainer');
+            const copyAllBtn = document.getElementById('copyAll');
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            let items = [];
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                navLinks.classList.toggle('active');
+            });
+            
+            addItemBtn.addEventListener('click', function() {
+                const itemName = document.getElementById('itemName').value.trim();
+                const quantity = parseInt(document.getElementById('quantity').value);
+                const price = parseInt(document.getElementById('price').value);
+                
+                if (!itemName) {
+                    showNotification('Please enter an item name', 'error');
+                    return;
+                }
+                
+                if (isNaN(quantity) || quantity < 1) {
+                    showNotification('Please enter a valid quantity', 'error');
+                    return;
+                }
+                
+                if (isNaN(price) || price < 1) {
+                    showNotification('Please enter a valid price', 'error');
+                    return;
+                }
+                
+                addItem(itemName, quantity, price);
+                
+                // Clear form
+                document.getElementById('itemName').value = '';
+                document.getElementById('quantity').value = '1';
+                document.getElementById('price').value = '1';
+                
+                showNotification('Item added successfully!');
+            });
+            
+            function addItem(name, quantity, price) {
+                // Add to items array
+                items.push({ name, quantity, price });
+                
+                // Update UI
+                updateItemsList();
+                generateCommands();
+            }
+            
+            function updateItemsList() {
+                itemsContainer.innerHTML = '';
+                
+                if (items.length === 0) {
+                    itemsContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No items added yet</p>';
+                    return;
+                }
+                
+                items.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'item';
+                    itemElement.innerHTML = `
+                        <div class="item-info">
+                            <strong>${formatItemName(item.name)}</strong><br>
+                            <span style="color: var(--text-muted);">Quantity: ${item.quantity} | Price: $${item.price}</span>
+                        </div>
+                        <div class="item-actions">
+                            <button class="delete-btn" data-index="${index}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    `;
+                    itemsContainer.appendChild(itemElement);
+                });
+                
+                // Add event listeners to delete buttons
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        items.splice(index, 1);
+                        updateItemsList();
+                        generateCommands();
+                        showNotification('Item deleted');
+                    });
+                });
+            }
+            
+            function generateCommands() {
+                commandsContainer.innerHTML = '';
+                
+                if (items.length === 0) {
+                    commandsContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Add items to generate commands</p>';
+                    return;
+                }
+                
+                items.forEach(item => {
+                    const commandElement = document.createElement('div');
+                    commandElement.className = 'command-block';
+                    
+                    const command1 = `execute as @a[hasitem={item=${item.name},quantity=${item.quantity}..}] at @s if block ~~-1~ lodestone run scoreboard players add @s money ${item.price}`;
+                    const command2 = `execute as @a[hasitem={item=${item.name},quantity=${item.quantity}..}] at @s if block ~~-1~ lodestone run clear @s ${item.name} 0 ${item.quantity}`;
+                    
+                    commandElement.innerHTML = `# ${formatItemName(item.name)} (quantity: ${item.quantity}, price: ${item.price})
+${command1}
+${command2}
+`;
+                    
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-btn';
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Commands';
+                    copyBtn.addEventListener('click', function() {
+                        copyToClipboard(commandElement.textContent);
+                        showNotification('Commands copied to clipboard!');
+                    });
+                    
+                    commandElement.appendChild(copyBtn);
+                    commandsContainer.appendChild(commandElement);
+                });
+            }
+            
+            function formatItemName(name) {
+                return name.split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+            }
+            
+            copyAllBtn.addEventListener('click', function() {
+                if (items.length === 0) {
+                    showNotification('No commands to copy', 'error');
+                    return;
+                }
+                
+                const allCommands = Array.from(document.querySelectorAll('.command-block'))
+                    .map(block => block.textContent.replace('Copy Commands', '').trim())
+                    .join('\n\n');
+                
+                copyToClipboard(allCommands);
+                showNotification('All commands copied to clipboard!');
+            });
+            
+            function copyToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+            
+            function showNotification(message, type = 'success') {
+                notificationText.textContent = message;
+                
+                if (type === 'success') {
+                    notification.style.background = 'var(--success)';
+                } else {
+                    notification.style.background = 'var(--danger)';
+                }
+                
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Initialize with empty items list
+            updateItemsList();
+            generateCommands();
+        });
+    </script>
+</body>
+</html>
